@@ -79,26 +79,44 @@ class Monitor:
     def get_nodes_rsrc(self, debug=False):
         if debug:
             print("Get nodes resources")
-        nodes = self.get_nodes()[1]
+
+        # Get the Usage metrics
+        metrics_api = client.CustomObjectsApi()
+        metrics = metrics_api.list_cluster_custom_object(group="metrics.k8s.io", version="v1beta1", plural="nodes")
+        metrics = metrics["items"]
+        usage_metrics = {}
+        for metric in metrics:
+            usage_metric = {
+                "cpu": metrics["usage"]["cpu"],
+                "memory": metrics["usage"]["memory"]
+            }
+            usage_metrics[metric["metadata"]["name"]] = usage_metric
+
+        # Get the number of pods running on each node
+        pods = self.core_api.list_namespaced_pod(namespace="default")
+        pods = pods.items
+        pods_per_node = {}
+        for pod in pods:
+            node_name = pod.spec.node_name
+            if node_name in pods_per_node:
+                pods_per_node[node_name] += 1
+            else:
+                pods_per_node[node_name] = 1
 
         nodes_rsrc = {}
-        for node in nodes:
-            node_name = node.metadata.name
-            node_rsrc = {}
-            node_rsrc["cpu"] = (node.status.allocatable["cpu"], node.status.capacity["cpu"])
-            node_rsrc["memory"] = (node.status.allocatable["memory"], node.status.capacity["memory"])
-            node_rsrc["pod_cap"] = (node.status.allocatable["pods"], node.status.capacity["pods"])
-            nodes_rsrc[node_name] = node_rsrc
-    
+        for node in self.get_nodes()[0]:
+            node_rsrc = {
+                "cpu": (usage_metrics[node]["cpu"], self.get_node(node).status.allocatable["cpu"]),
+                "memory": (usage_metrics[node]["memory"], self.get_node(node).status.allocatable["memory"]),
+                "pod_cap": (pods_per_node[node], self.get_node(node).status.allocatable["pods"])
+            }
+            nodes_rsrc[node] = node_rsrc
+
         return nodes_rsrc
     
     def get_node_rsrc(self, node_name, debug=False):
         if debug:
             print("Get node resources: " + node_name)
-        node = self.get_node(node_name)
-        node_rsrc = {}
-        node_rsrc["name"] = node.metadata.name
-        node_rsrc["cpu"] = (node.status.allocatable["cpu"], node.status.capacity["cpu"])
-        node_rsrc["memory"] = (node.status.allocatable["memory"], node.status.capacity["memory"])
-        node_rsrc["pod_cap"] = (node.status.allocatable["pods"], node.status.capacity["pods"])
-        return node_rsrc
+        
+        nodes_rsrc = self.get_nodes_rsrc()
+        return nodes_rsrc[node_name]
