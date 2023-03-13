@@ -4,6 +4,7 @@ from time import sleep
 import numpy as np
 
 from utils.monitor import Monitor
+from utils.unit_matcher import *
 
 class RealKubeEnv(gym.Env):
     def __init__(self):
@@ -44,13 +45,13 @@ class RealKubeEnv(gym.Env):
             if debug:
                 print(_util)
             util[node] = {
-                "cpu": 1 - _util["cpu"][0] / _util["cpu"][1] * 100,
-                "mem": 1 - _util["mem"][0] / _util["mem"][1] * 100
+                "cpu": 1 - convert_cpu_unit(_util["cpu"][0]) / convert_cpu_unit(_util["cpu"][1]) * 100,
+                "mem": 1 - convert_memory_unit(_util["mem"][0]) / convert_memory_unit(_util["mem"][1]) * 100
             }
 
         # AvgUtil = mean of cpu and mem utilization of all node
-        avg_cpu = np.mean([util[node]["cpu"] for node in self.node_list])
-        avg_mem = np.mean([util[node]["mem"] for node in self.node_list])
+        avg_cpu = np.mean([convert_cpu_unit(util[node]["cpu"]) for node in self.node_list])
+        avg_mem = np.mean([convert_memory_unit(util[node]["mem"]) for node in self.node_list])
         avg_util = (avg_cpu + avg_mem) / 2
         if debug:
             print("AvgCPU: " + str(avg_cpu))
@@ -58,8 +59,8 @@ class RealKubeEnv(gym.Env):
             print("AvgUtil: " + str(avg_util))
 
         # ImBalance = summation of standard deviation of each resource in all nodes
-        std_cpu = np.std([util[node]["cpu"] for node in self.node_list])
-        std_mem = np.std([util[node]["mem"] for node in self.node_list])
+        std_cpu = np.std([convert_cpu_unit(util[node]["cpu"]) for node in self.node_list])
+        std_mem = np.std([convert_memory_unit(util[node]["mem"]) for node in self.node_list])
         imbalance = std_cpu + std_mem
         if debug:
             print("StdCPU: " + str(std_cpu))
