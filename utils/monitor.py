@@ -114,9 +114,9 @@ class Monitor:
             num_running_pods = len(running_pods)
 
             node_rsrc = {
-                "cpu": (convert_cpu_unit(usage_metrics[node]["cpu"]), convert_cpu_unit(self.get_node(node).status.allocatable["cpu"])),
-                "memory": (convert_memory_unit(usage_metrics[node]["memory"]), convert_memory_unit(self.get_node(node).status.allocatable["memory"])),
-                "n_pod": (num_running_pods, int(self.get_node(node).status.allocatable["pods"]))
+                "cpu": (usage_metrics[node]["cpu"], self.get_node(node).status.allocatable["cpu"], int(usage_metrics[node]["cpu"] / self.get_node(node).status.allocatable["cpu"] * 100)),
+                "memory": (usage_metrics[node]["memory"], self.get_node(node).status.allocatable["memory"], int(usage_metrics[node]["memory"] / self.get_node(node).status.allocatable["memory"] * 100)),
+                "n_pod": (num_running_pods, self.get_node(node).status.allocatable["pods"], int(num_running_pods / self.get_node(node).status.allocatable["pods"] * 100))
             }
             nodes_rsrc[node] = node_rsrc
 
