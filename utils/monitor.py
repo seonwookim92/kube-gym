@@ -64,10 +64,12 @@ class Monitor:
         pod_rqsts["memory"] = rqsts["memory"] if rqsts else "500Mi"
         return pod_rqsts
     
-    def get_nodes(self, debug=False):
+    def get_nodes(self, exclude_master=True, debug=False):
         if debug:
             print("Get nodes")
         nodes = self.core_api.list_node()
+        if exclude_master:
+            nodes.items = [node for node in nodes.items if "master" not in node.metadata.name or "control" not in node.metadata.name]
         node_names = [node.metadata.name for node in nodes.items]
         return (node_names, nodes.items)
     
