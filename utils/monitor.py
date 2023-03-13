@@ -121,7 +121,7 @@ class Monitor:
             cap_pod = int(self.get_node(node).status.allocatable["pods"])
 
             node_rsrc = {
-                "cpu": (usage_cpu, cap_cpu, int(usage_cpu/cap_cp * 100)),
+                "cpu": (usage_cpu, cap_cpu, int(usage_cpu/cap_cpu * 100)),
                 "memory": (usage_memory, cap_memory, int(usage_memory/cap_memory * 100)),
                 "n_pod": (usage_pod, cap_pod, int(usage_pod/cap_pod * 100))
             }
