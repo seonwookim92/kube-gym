@@ -115,7 +115,8 @@ class Monitor:
             usage_memory = convert_memory_unit(usage_metrics[node]["memory"])
             cap_memory = convert_memory_unit(self.get_node(node).status.allocatable["memory"])
 
-            pods = self.core_api.list_pod_for_all_namespaces(field_selector=f"spec.nodeName={node}").items
+            # Pods running on the node
+            pods = self.core_api.list_namespaced_pod(namespace="default", field_selector="spec.nodeName=" + node)
             running_pods = [pod for pod in pods if pod.status.phase == "Running"]
             usage_pod = len(running_pods)
             cap_pod = int(self.get_node(node).status.allocatable["pods"])
