@@ -1,4 +1,5 @@
 from kubernetes import client, config
+from utils.unit_matcher import convert_cpu_unit, convert_memory_unit
 
 class Monitor:
     def __init__(self, cfg=None, sched=None):
@@ -113,8 +114,8 @@ class Monitor:
             num_running_pods = len(running_pods)
 
             node_rsrc = {
-                "cpu": (usage_metrics[node]["cpu"], self.get_node(node).status.allocatable["cpu"]),
-                "memory": (usage_metrics[node]["memory"], self.get_node(node).status.allocatable["memory"]),
+                "cpu": (convert_cpu_unit(usage_metrics[node]["cpu"]), convert_cpu_unit(self.get_node(node).status.allocatable["cpu"])),
+                "memory": (convert_memory_unit(usage_metrics[node]["memory"]), convert_memory_unit(self.get_node(node).status.allocatable["memory"])),
                 "n_pod": (num_running_pods, self.get_node(node).status.allocatable["pods"])
             }
             nodes_rsrc[node] = node_rsrc
