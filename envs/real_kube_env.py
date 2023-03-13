@@ -50,8 +50,8 @@ class RealKubeEnv(gym.Env):
             }
 
         # AvgUtil = mean of cpu and mem utilization of all node
-        avg_cpu = -np.mean([util[node]["cpu"] for node in self.node_list])
-        avg_mem = -np.mean([util[node]["memory"] for node in self.node_list])
+        avg_cpu = np.mean([util[node]["cpu"] for node in self.node_list])
+        avg_mem = np.mean([util[node]["memory"] for node in self.node_list])
         avg_util = (avg_cpu + avg_mem) / 2
         if debug:
             print("AvgCPU: " + str(avg_cpu))
