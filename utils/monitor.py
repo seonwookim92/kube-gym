@@ -87,8 +87,8 @@ class Monitor:
         usage_metrics = {}
         for metric in metrics:
             usage_metric = {
-                "cpu": metrics["usage"]["cpu"],
-                "memory": metrics["usage"]["memory"]
+                "cpu": metric["usage"]["cpu"],
+                "memory": metric["usage"]["memory"]
             }
             usage_metrics[metric["metadata"]["name"]] = usage_metric
 
