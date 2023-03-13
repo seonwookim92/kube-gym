@@ -69,7 +69,7 @@ class Monitor:
             print("Get nodes")
         nodes = self.core_api.list_node()
         if exclude_master:
-            nodes.items = [node for node in nodes.items if "master" not in node.metadata.name or "control" not in node.metadata.name]
+            nodes.items = [node for node in nodes.items if "node-0" not in node.metadata.name]
         node_names = [node.metadata.name for node in nodes.items]
         return (node_names, nodes.items)
     
