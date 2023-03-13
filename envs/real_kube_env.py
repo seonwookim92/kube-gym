@@ -1,6 +1,7 @@
 import gym
 from gym import spaces
 from time import sleep
+import numpy as np
 
 from utils.monitor import Monitor
 
@@ -33,7 +34,35 @@ class RealKubeEnv(gym.Env):
         self.action_space = spaces.Discrete(self.num_nodes)
 
     def calc_reward(self):
-        pass
+        # Utilization of resources on each node
+        util = {}
+        for node in self.node_list:
+            _util = self.monitor.get_node_rsrc(node)
+            util[node] = {
+                "cpu": 1 - _util["cpu"][0] / _util["cpu"][1] * 100,
+                "mem": 1 - _util["mem"][0] / _util["mem"][1] * 100
+            }
+
+        # AvgUtil = mean of cpu and mem utilization of all node
+        avg_cpu = np.mean([util[node]["cpu"] for node in self.node_list])
+        avg_mem = np.mean([util[node]["mem"] for node in self.node_list])
+        avg_util = (avg_cpu + avg_mem) / 2
+
+        # ImBalance = summation of standard deviation of each resource in all nodes
+        std_cpu = np.std([util[node]["cpu"] for node in self.node_list])
+        std_mem = np.std([util[node]["mem"] for node in self.node_list])
+        imbalance = std_cpu + std_mem
+
+        # Reward = a*AvgUtil - b*ImBalance
+        a = 1
+        b = 1
+        reward = a * avg_util - b * imbalance
+
+        print("AvgUtil: " + str(avg_util))
+
+        return reward
+
+
 
     def step(self, action):
         pass
