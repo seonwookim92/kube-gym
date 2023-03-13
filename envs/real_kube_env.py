@@ -36,11 +36,13 @@ class RealKubeEnv(gym.Env):
         # Initialize the action space
         self.action_space = spaces.Discrete(self.num_nodes)
 
-    def calc_reward(self):
+    def calc_reward(self, debug=False):
         # Utilization of resources on each node
         util = {}
         for node in self.node_list:
             _util = self.monitor.get_node_rsrc(node)
+            if debug:
+                print(_util)
             util[node] = {
                 "cpu": 1 - _util["cpu"][0] / _util["cpu"][1] * 100,
                 "mem": 1 - _util["mem"][0] / _util["mem"][1] * 100
@@ -50,11 +52,19 @@ class RealKubeEnv(gym.Env):
         avg_cpu = np.mean([util[node]["cpu"] for node in self.node_list])
         avg_mem = np.mean([util[node]["mem"] for node in self.node_list])
         avg_util = (avg_cpu + avg_mem) / 2
+        if debug:
+            print("AvgCPU: " + str(avg_cpu))
+            print("AvgMem: " + str(avg_mem))
+            print("AvgUtil: " + str(avg_util))
 
         # ImBalance = summation of standard deviation of each resource in all nodes
         std_cpu = np.std([util[node]["cpu"] for node in self.node_list])
         std_mem = np.std([util[node]["mem"] for node in self.node_list])
         imbalance = std_cpu + std_mem
+        if debug:
+            print("StdCPU: " + str(std_cpu))
+            print("StdMem: " + str(std_mem))
+            print("Imbalance: " + str(imbalance))
 
         # Reward = a*AvgUtil - b*ImBalance
         a = 1
