@@ -109,14 +109,21 @@ class Monitor:
         nodes_rsrc = {}
         for node in self.get_nodes(exclude_master=True)[0]:
 
+            # metrics
+            usage_cpu = convert_cpu_unit(usage_metrics[node]["cpu"])
+            cap_cpu = convert_cpu_unit(self.get_node(node).status.allocatable["cpu"])
+            usage_memory = convert_memory_unit(usage_metrics[node]["memory"])
+            cap_memory = convert_memory_unit(self.get_node(node).status.allocatable["memory"])
+
             pods = self.core_api.list_pod_for_all_namespaces(field_selector=f"spec.nodeName={node}").items
             running_pods = [pod for pod in pods if pod.status.phase == "Running"]
-            num_running_pods = len(running_pods)
+            usage_pod = len(running_pods)
+            cap_pod = int(self.get_node(node).status.allocatable["pods"])
 
             node_rsrc = {
-                "cpu": (usage_metrics[node]["cpu"], self.get_node(node).status.allocatable["cpu"]),
-                "memory": (usage_metrics[node]["memory"], self.get_node(node).status.allocatable["memory"]),
-                "n_pod": (num_running_pods, self.get_node(node).status.allocatable["pods"])
+                "cpu": (usage_cpu, cap_cpu, int(usage_cpu/cap_cp * 100)),
+                "memory": (usage_memory, cap_memory, int(usage_memory/cap_memory * 100)),
+                "n_pod": (usage_pod, cap_pod, int(usage_pod/cap_pod * 100))
             }
             nodes_rsrc[node] = node_rsrc
 
