@@ -12,8 +12,11 @@ class RealKubeEnv(gym.Env):
 
         # Nodes
         self.node_list = self.monitor.get_nodes()[0]
-        self.node_list.remove("controlplane")
-        self.node_list.remove("node-0")
+        # If there are controlplane and node-0, remove them
+        if "controlplane" in self.node_list:
+            self.node_list.remove("controlplane")
+        if "node-0" in self.node_list:
+            self.node_list.remove("node-0")
         self.num_nodes = len(self.node_list)
 
         # Initialize node observation space Should be the number of nodes x 3 matrix
