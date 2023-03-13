@@ -116,7 +116,7 @@ class Monitor:
             node_rsrc = {
                 "cpu": (convert_cpu_unit(usage_metrics[node]["cpu"]), convert_cpu_unit(self.get_node(node).status.allocatable["cpu"])),
                 "memory": (convert_memory_unit(usage_metrics[node]["memory"]), convert_memory_unit(self.get_node(node).status.allocatable["memory"])),
-                "n_pod": (num_running_pods, self.get_node(node).status.allocatable["pods"])
+                "n_pod": (num_running_pods, int(self.get_node(node).status.allocatable["pods"]))
             }
             nodes_rsrc[node] = node_rsrc
 
