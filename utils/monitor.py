@@ -107,10 +107,15 @@ class Monitor:
 
         nodes_rsrc = {}
         for node in self.get_nodes(exclude_master=True)[0]:
+
+            pods = self.core_api.list_pod_for_all_namespaces(field_selector=f"spec.nodeName={node_name}").items
+            running_pods = [pod for pod in pods if pod.status.phase == "Running"]
+            num_running_pods = len(running_pods)
+
             node_rsrc = {
                 "cpu": (usage_metrics[node]["cpu"], self.get_node(node).status.allocatable["cpu"]),
                 "memory": (usage_metrics[node]["memory"], self.get_node(node).status.allocatable["memory"]),
-                "pod_cap": (pods_per_node[node], self.get_node(node).status.allocatable["pods"])
+                "n_pod": (num_running_pods, self.get_node(node).status.allocatable["pods"])
             }
             nodes_rsrc[node] = node_rsrc
 
