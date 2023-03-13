@@ -106,7 +106,7 @@ class Monitor:
                 pods_per_node[node_name] = 1
 
         nodes_rsrc = {}
-        for node in self.get_nodes()[0]:
+        for node in self.get_nodes(exclude_master=True)[0]:
             node_rsrc = {
                 "cpu": (usage_metrics[node]["cpu"], self.get_node(node).status.allocatable["cpu"]),
                 "memory": (usage_metrics[node]["memory"], self.get_node(node).status.allocatable["memory"]),
