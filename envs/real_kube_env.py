@@ -1,3 +1,4 @@
+import os
 import gym
 from gym import spaces
 from time import sleep
@@ -149,7 +150,9 @@ class RealKubeEnv(gym.Env):
         return state, reward, done, {}
 
     def reset(self):
-        pass
+        # kubectl delete jobs --all command
+        os.system("kubectl delete jobs --all")
+
 
 
 
