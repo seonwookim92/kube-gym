@@ -24,7 +24,7 @@ class RealKubeEnv(gym.Env):
         self.node_observation_space = spaces.Box(low=0, high=100, shape=(self.num_nodes, 3), dtype=int)
 
         # Initialize the most recent pending pod observation space
-        self.pod_observation_space = spaces.Box(low=0, high=100, shape=(1,), dtype=int)
+        self.pod_observation_space = spaces.Box(low=0, high=100, shape=(2,), dtype=int)
 
         # Initialize the observation space
         self.observation_space = spaces.Tuple((self.node_observation_space, self.pod_observation_space))
@@ -75,6 +75,51 @@ class RealKubeEnv(gym.Env):
         print("AvgUtil: " + str(avg_util))
 
         return reward
+    
+    def observe_state(self, debug=False):
+        # Node cpu, memory capacity
+        node_cpu_cap = self.monitor.get_node_rsrc(self.node_list[0])["cpu"][1]
+        node_memory_cap = self.monitor.get_node_rsrc(self.node_list[0])["memory"][1]
+        if debug:
+            print("Node CPU Capacity: " + str(node_cpu_cap))
+            print("Node Memory Capacity: " + str(node_memory_cap))
+
+        # Get the most recent pending pod
+        pending_pods_names = self.monitor.get_pending_pods()[0]
+        if debug:
+            print("Pending Pod: " + str(pending_pods_names))
+        if len(pending_pods_names) == 0:
+            pending_pod_obs = np.array([0, 0])
+        else:
+            pending_pod_name = pending_pods_names[0]
+            pending_pod_rqsts = self.monitor.get_pod_rqsts(pending_pod_name)
+
+            pending_pod_cpu_rqst = max(int(pending_pod_rqsts["cpu"] / node_cpu_cap * 100), 1)
+            pending_pod_memory_rqst = max(int(pending_pod_rqsts["memory"] / node_memory_cap * 100), 1)
+
+            pending_pod_obs = np.array([pending_pod_cpu_rqst, pending_pod_memory_rqst])
+            if debug:
+                print("Pending Pod Observation: " + str(pending_pod_obs))
+
+        # Get the resource utilization of each node
+        node_obs = []
+        for node in self.node_list:
+            node_rsrc = self.monitor.get_node_rsrc(node)
+
+            node_cpu_util = node_rsrc["cpu"][2]
+            node_memory_util = node_rsrc["memory"][2]
+
+            node_obs.append([node_cpu_util, node_memory_util])
+
+        if debug:
+            print("Node Observation: " + str(node_obs))
+
+        state = (node_obs, pending_pod_obs)
+
+        if debug:
+            print("State: " + str(state))
+
+        return state
 
 
 
