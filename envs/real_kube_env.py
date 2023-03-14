@@ -6,10 +6,13 @@ import numpy as np
 from utils.monitor import Monitor
 from utils.unit_matcher import *
 
+from scheduler import Scheduler
+
 class RealKubeEnv(gym.Env):
     def __init__(self):
         super(RealKubeEnv, self).__init__()
         self.monitor = Monitor()
+        self.scheduler = Scheduler()
 
         # Nodes
         self.node_list = self.monitor.get_nodes()[0]
@@ -126,10 +129,24 @@ class RealKubeEnv(gym.Env):
 
         return state
 
-
-
     def step(self, action):
-        pass
+        # Take an action in the environment based on the provided action
+        pod_name, node_name = action
+        self.scheduler.scheduling(pod_name, node_name)
+
+        sleep(10)
+
+        # Observe the state of the environment
+        state = self.observe_state()
+
+        # Calculate the reward
+        reward = self.calc_reward()
+
+        # Check if the episode is done ===> Set to False for now
+        done = False
+
+        # Return the state, reward, and done
+        return state, reward, done, {}
 
     def reset(self):
         pass
