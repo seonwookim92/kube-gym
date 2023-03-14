@@ -3,12 +3,12 @@ def convert_cpu_unit(size):
     # If no units follow the number, assume it is a single core
     size = str(size)
     if size[-1].isdigit():
-        return float(size) * 1000 * 1000 * 1000
+        return float(size) * 1000
     # If the unit is "m", assume it is milicores
     elif size[-1] == "m":
-        return float(size[:-1]) * 1000 * 1000
-    elif size[-1] == "n":
         return float(size[:-1])
+    elif size[-1] == "n":
+        return float(size[:-1]) / 1000
 
 def convert_memory_unit(size):
     size = str(size)
