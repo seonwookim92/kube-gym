@@ -96,6 +96,9 @@ class RealKubeEnv(gym.Env):
                 print("Pending Pod Name: " + str(pending_pod_name))
             pending_pod_rqsts = self.monitor.get_pod_rqsts(pending_pod_name)
 
+            if debug:
+                print("Pending Pod Requests: " + str(pending_pod_rqsts))
+
             pending_pod_cpu_rqst = max(int(pending_pod_rqsts["cpu"] / node_cpu_cap * 100), 1)
             pending_pod_memory_rqst = max(int(pending_pod_rqsts["memory"] / node_memory_cap * 100), 1)
 
