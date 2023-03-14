@@ -72,7 +72,7 @@ class RealKubeEnv(gym.Env):
         b = 1
         reward = a * avg_util - b * imbalance
 
-        print("AvgUtil: " + str(avg_util))
+        print("Reward: " + str(reward))
 
         return reward
     
@@ -92,6 +92,8 @@ class RealKubeEnv(gym.Env):
             pending_pod_obs = np.array([0, 0])
         else:
             pending_pod_name = pending_pods_names[0]
+            if debug:
+                print("Pending Pod Name: " + str(pending_pod_name))
             pending_pod_rqsts = self.monitor.get_pod_rqsts(pending_pod_name)
 
             pending_pod_cpu_rqst = max(int(pending_pod_rqsts["cpu"] / node_cpu_cap * 100), 1)
