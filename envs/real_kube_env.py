@@ -48,8 +48,8 @@ class RealKubeEnv(gym.Env):
             if debug:
                 print(_util)
             util[node] = {
-                "cpu": 1 - _util["cpu"][0] / _util["cpu"][1] * 100,
-                "memory": 1 - _util["memory"][0] / _util["memory"][1] * 100
+                "cpu": 100 - _util["cpu"][0] / _util["cpu"][1] * 100,
+                "memory": 100 - _util["memory"][0] / _util["memory"][1] * 100
             }
 
         # AvgUtil = mean of cpu and mem utilization of all node
@@ -73,7 +73,7 @@ class RealKubeEnv(gym.Env):
         # Reward = a*AvgUtil - b*ImBalance
         a = 1
         b = 1
-        reward = a * avg_util - b * imbalance
+        reward = round(a * avg_util - b * imbalance, 3)
 
         print("Reward: " + str(reward))
 
